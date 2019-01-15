@@ -27,7 +27,7 @@ class Model:
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
-      noise = tf.random.uniform(tf.shape(x)) * 0.25
+      noise = tf.random.normal(tf.shape(x), stddev=0.25)
       x = x + noise * f_training
 
       # x = self.conv2d(x, 16, 4, 2, name='decode_4', training=training)
