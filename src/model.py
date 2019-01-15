@@ -26,7 +26,7 @@ class Model:
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
-      # x = tf.layers.dropout(x, training=training, rate=0.2)
+      x = tf.layers.dropout(x, training=training, rate=0.5)
       x = self.conv2d(x, 16, 3, 2, name='decode_4', training=training)
       x = self.conv2d(x, 16, 3, 2, name='decode_3', training=training)
       x = self.conv2d(x, 16, 3, 2, name='decode_2', training=training)
