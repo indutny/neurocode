@@ -39,8 +39,8 @@ with tf.Session() as sess:
   training_encoding = model.encode(training_data, training=True)
   training_prediction = model.decode(training_encoding, training=True)
 
-  validation_encoding = model.encode(validation_data, training=False)
-  validation_prediction = model.decode(validation_encoding, training=False)
+  validation_encoding = model.encode(validation_data, training=True)
+  validation_prediction = model.decode(validation_encoding, training=True)
 
   loss, training_metrics = \
       model.loss_and_metrics(predictions=training_prediction, \
