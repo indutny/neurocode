@@ -22,13 +22,14 @@ class Model:
       f_training = tf.cast(training, dtype=tf.float32)
       contrast = tf.random.uniform([ tf.shape(image)[0], 1, 1, 1 ])
       x -= 0.5
-      x *= contrast * f_training
+      x *= 0.5 + contrast * f_training * 1.5
       x += 0.5
 
-      x = tf.layers.dropout(x, rate=0.9, training=training)
-
+      x = tf.layers.dropout(x, training=training)
       x = self.conv2d(x, 2, 1, 1, name='decode_3', training=training)
+      x = tf.layers.dropout(x, training=training)
       x = self.conv2d(x, 4, 8, 2, name='decode_2', training=training)
+      x = tf.layers.dropout(x, training=training)
       x = self.conv2d(x, 1, 4, 2, name='decode_1', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
