@@ -21,14 +21,21 @@ class Model:
       x = image
 
       f_training = tf.cast(training, dtype=tf.float32)
+
+      # Contrast
       contrast = tf.exp(tf.random.normal(tf.shape(x), \
           mean=0.0, stddev=0.405465))
       x -= 0.5
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
+      # Noise
       noise = tf.random.normal(tf.shape(x), stddev=0.3)
-      x = x + noise * f_training
+      x += noise * f_training
+
+      # Non-normalizing dropout
+      mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
+      x *= f_training * mask + (1.0 - f_training) * 1.0
 
       x = self.conv2d(x, 8, 4, 2, name='decode_4', training=training)
       x = self.conv2d(x, 8, 4, 2, name='decode_3', training=training)
