@@ -18,7 +18,7 @@ VALIDATE_EVERY = 10
 writer = tf.summary.FileWriter(LOG_DIR)
 
 def gen_data():
-  batch_noise = tf.random.uniform([ BATCH_SIZE, 128, 128, 1 ])
+  batch_noise = tf.random.uniform([ BATCH_SIZE, 32, 32, 8 ])
   return tf.cast(batch_noise > 0.5, dtype=tf.float32)
 
 with tf.Session() as sess:
