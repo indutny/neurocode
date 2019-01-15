@@ -10,7 +10,7 @@ class Model:
 
       x = self.deconv2d(x, 8, 3, 2, name='encode_1', training=training)
       x = self.deconv2d(x, 16, 3, 2, name='encode_2', training=training)
-      x = self.deconv2d(x, 32, 3, 1, name='encode_3', training=training)
+      x = self.deconv2d(x, 32, 3, 2, name='encode_3', training=training)
       x = self.deconv2d(x, 1, 1, 1, name='encode_4', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
@@ -39,7 +39,7 @@ class Model:
 
       x = self.conv2d(x, 8, 3, 2, name='decode_4', training=training)
       x = self.conv2d(x, 16, 3, 2, name='decode_3', training=training)
-      x = self.conv2d(x, 32, 3, 1, name='decode_2', training=training)
+      x = self.conv2d(x, 32, 3, 2, name='decode_2', training=training)
       x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
           activation=None, bn=False)
 
