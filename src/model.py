@@ -9,7 +9,7 @@ class Model:
       x = data
 
       # x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
-      x = self.deconv2d(x, 16, 4, 2, name='encode_2', training=training)
+      x = self.deconv2d(x, 32, 4, 2, name='encode_2', training=training)
       # x = self.deconv2d(x, 16, 4, 2, name='encode_3', training=training)
       x = self.deconv2d(x, 3, 1, 1, name='encode_4', training=training,
           activation=tf.nn.sigmoid, bn=False)
@@ -27,11 +27,11 @@ class Model:
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
-      noise = tf.random.normal(tf.shape(x), stddev=0.25)
+      noise = tf.random.normal(tf.shape(x), stddev=0.5)
       x = x + noise * f_training
 
       # x = self.conv2d(x, 16, 4, 2, name='decode_4', training=training)
-      x = self.conv2d(x, 16, 4, 2, name='decode_3', training=training)
+      x = self.conv2d(x, 32, 4, 2, name='decode_3', training=training)
       # x = self.conv2d(x, 16, 4, 2, name='decode_2', training=training)
       x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
           activation=None, bn=False)
