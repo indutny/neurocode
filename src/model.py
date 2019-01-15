@@ -37,7 +37,9 @@ class Model:
 
   def loss_and_metrics(self, predictions, labels, tag='train'):
     loss = tf.losses.mean_squared_error(predictions=predictions, labels=labels)
-    accuracy = tf.cast((predictions > 0.5) == (labels > 0.5), dtype=tf.float32)
+
+    accuracy = tf.cast(
+        tf.equal(predictions > 0.5, labels > 0.5), dtype=tf.float32)
     accuracy = tf.reduce_mean(accuracy)
 
     metrics = [
