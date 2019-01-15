@@ -14,7 +14,7 @@ class Model:
       x = self.deconv2d(x, 3, 1, 1, name='encode_4', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
-      return light
+      return x
 
   def decode(self, image, training):
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[image]):
