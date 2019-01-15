@@ -20,12 +20,12 @@ class Model:
       x = image
 
       f_training = tf.cast(training, dtype=tf.float32)
-      contrast = 1.9 * tf.random.uniform([ tf.shape(image)[0], 1, 1, 1 ]) + 0.1
+      contrast = tf.random.normal([ tf.shape(image)[0], 1, 1, 1 ], mean=1.0)
       x -= 0.5
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
-      x = tf.layers.dropout(x, training=training, rate=0.8)
+      # x = tf.layers.dropout(x, training=training, rate=0.8)
       x = self.conv2d(x, 2, 1, 1, name='decode_3', training=training)
       x = self.conv2d(x, 4, 3, 2, name='decode_2', training=training)
       x = self.conv2d(x, 1, 3, 2, name='decode_1', training=training,
