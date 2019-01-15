@@ -47,9 +47,6 @@ class Model:
     x = tf.layers.conv2d(x, filters=filters, kernel_size=size,
         padding='SAME',
         strides=(strides, strides), name='{}_conv2d'.format(name))
-    if bn:
-      x = tf.layers.batch_normalization(x, momentum=0.9, epsilon=1e-5,
-          training=training, name='{}_bn'.format(name))
     if not activation is None:
       x = activation(x)
     return x
@@ -59,9 +56,6 @@ class Model:
     x = tf.layers.conv2d_transpose(x, filters=filters, kernel_size=size,
         padding='SAME',
         strides=(strides, strides), name='{}_deconv2d'.format(name))
-    if bn:
-      x = tf.layers.batch_normalization(x, momentum=0.9, epsilon=1e-5,
-          training=training, name='{}_bn'.format(name))
     if not activation is None:
       x = activation(x)
     return x
