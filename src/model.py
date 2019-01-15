@@ -8,7 +8,7 @@ class Model:
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[data]):
       x = data
 
-      x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
+      # x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
       x = self.deconv2d(x, 32, 4, 2, name='encode_2', training=training)
       # x = self.deconv2d(x, 16, 4, 2, name='encode_3', training=training)
       x = self.deconv2d(x, 3, 1, 1, name='encode_4', training=training,
@@ -32,7 +32,7 @@ class Model:
 
       # x = self.conv2d(x, 16, 4, 2, name='decode_4', training=training)
       x = self.conv2d(x, 32, 4, 2, name='decode_3', training=training)
-      x = self.conv2d(x, 16, 4, 2, name='decode_2', training=training)
+      # x = self.conv2d(x, 16, 4, 2, name='decode_2', training=training)
       x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
           activation=None, bn=False)
 
