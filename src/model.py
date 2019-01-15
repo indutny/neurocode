@@ -8,9 +8,8 @@ class Model:
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[data]):
       x = data
 
-      x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
-      x = self.deconv2d(x, 32, 4, 2, name='encode_2', training=training)
-      x = self.deconv2d(x, 1, 1, 1, name='encode_3', training=training,
+      x = self.deconv2d(x, 64, 8, 2, name='encode_1', training=training)
+      x = self.deconv2d(x, 1, 1, 1, name='encode_2', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
       return x
@@ -25,10 +24,9 @@ class Model:
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
-      x = tf.layers.dropout(x, training=training, rate=0.2)
-      x = self.conv2d(x, 32, 1, 1, name='decode_3', training=training)
-      x = self.conv2d(x, 16, 4, 2, name='decode_2', training=training)
-      x = self.conv2d(x, 8, 4, 2, name='decode_1', training=training,
+      # x = tf.layers.dropout(x, training=training, rate=0.2)
+      x = self.conv2d(x, 64, 8, 2, name='decode_2', training=training)
+      x = self.conv2d(x, 8, 4, 1, name='decode_1', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
       return x
