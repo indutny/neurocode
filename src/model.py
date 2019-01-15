@@ -22,7 +22,7 @@ class Model:
 
       f_training = tf.cast(training, dtype=tf.float32)
       contrast = tf.exp(tf.random.normal(tf.shape(x), \
-          mean=0.0, stddev=0.223143))
+          mean=0.0, stddev=0.405465))
       x -= 0.5
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
