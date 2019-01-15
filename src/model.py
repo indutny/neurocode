@@ -11,10 +11,13 @@ class Model:
       x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
       x = self.deconv2d(x, 32, 4, 2, name='encode_2', training=training)
       # x = self.deconv2d(x, 16, 4, 2, name='encode_3', training=training)
-      x = self.deconv2d(x, 1, 1, 1, name='encode_4', training=training,
-          activation=tf.nn.sigmoid, bn=False)
+      x = self.deconv2d(x, 2, 1, 1, name='encode_4', training=training,
+          activation=None, bn=False)
 
-      return x
+      x = tf.nn.softmax(x, axis=-1)
+      light, dark = tf.split(x, [ 1, 1 ], axis=-1)
+
+      return light
 
   def decode(self, image, training):
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[image]):
