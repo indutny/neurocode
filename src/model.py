@@ -11,11 +11,8 @@ class Model:
       x = self.deconv2d(x, 16, 4, 2, name='encode_1', training=training)
       x = self.deconv2d(x, 32, 4, 2, name='encode_2', training=training)
       # x = self.deconv2d(x, 16, 4, 2, name='encode_3', training=training)
-      x = self.deconv2d(x, 2, 1, 1, name='encode_4', training=training,
-          activation=None, bn=False)
-
-      x = tf.nn.softmax(x, axis=-1)
-      light, dark = tf.split(x, [ 1, 1 ], axis=-1)
+      x = self.deconv2d(x, 3, 1, 1, name='encode_4', training=training,
+          activation=tf.nn.sigmoid, bn=False)
 
       return light
 
@@ -36,16 +33,24 @@ class Model:
       # x = self.conv2d(x, 16, 4, 2, name='decode_4', training=training)
       x = self.conv2d(x, 32, 4, 2, name='decode_3', training=training)
       x = self.conv2d(x, 16, 4, 2, name='decode_2', training=training)
-      x = self.conv2d(x, 8, 1, 1, name='decode_1', training=training,
-          activation=tf.nn.sigmoid, bn=False)
+      x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
+          activation=None, bn=False)
 
       return x
 
   def loss_and_metrics(self, predictions, labels, tag='train'):
-    loss = tf.losses.mean_squared_error(predictions=predictions, labels=labels)
+    int_labels = tf.cast(labels, dtype=tf.int32)
+    binary_labels = tf.one_hot(int_labels, 2, axis=-1)
+    binary_predictions = tf.reshape(predictions, tf.shape(binary_labels))
+
+    loss = tf.losses.softmax_cross_entropy(onehot_labels=binary_labels,
+        logits=binary_predictions)
+
+    int_predictions = tf.argmax(binary_predictions, axis=-1)
+    int_predictions = tf.cast(int_predictions, dtype=tf.int32)
 
     accuracy = tf.cast(
-        tf.equal(predictions > 0.5, labels > 0.5), dtype=tf.float32)
+        tf.equal(int_predictions, int_labels), dtype=tf.float32)
     accuracy = tf.reduce_mean(accuracy)
 
     metrics = [
