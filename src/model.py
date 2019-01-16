@@ -1,4 +1,5 @@
 import tensorflow as tf
+import math
 
 class Model:
   def __init__(self):
@@ -11,10 +12,18 @@ class Model:
       x = self.deconv2d(x, 32, 3, 1, name='encode_1', training=training)
       x = self.deconv2d(x, 16, 3, 2, name='encode_2', training=training)
       x = self.deconv2d(x, 8, 3, 1, name='encode_3', training=training)
-      x = self.deconv2d(x, 1, 1, 1, name='encode_4', training=training,
-          activation=tf.nn.sigmoid, bn=False)
+      x = self.deconv2d(x, 2, 1, 1, name='encode_4', training=training,
+          activation=tf.nn.l2_normalize, bn=False)
 
       return x
+
+  def to_image(self, image):
+    sin, cos = tf.split(image, [ 1, 1 ], axis=-1)
+    angle = tf.math.atan2(sin, cos)
+    hue = (angle / math.pi + 1.0) / 2.0
+    pad = tf.ones_like(hue)
+    hsv = tf.concat([ hue, pad, pad ], axis=-1)
+    return tf.image.hsv_to_rgb(hsv)
 
   def decode(self, image, training):
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[image]):

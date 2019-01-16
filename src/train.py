@@ -52,7 +52,7 @@ with tf.Session() as sess:
 
   # Sample image
   image = tf.summary.image('sample',
-      model.encode(validation_data[:1], training=False))
+      model.to_image(model.encode(validation_data[:1], training=False)))
   validation_metrics = tf.summary.merge([ validation_metrics, image ])
 
   writer.add_graph(tf.get_default_graph())
