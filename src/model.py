@@ -67,6 +67,7 @@ class Model:
   def conv2d(self, x, filters, size, strides, name, training,
              activation=tf.nn.relu, bn=True):
     x = tf.layers.conv2d(x, filters=filters, kernel_size=size,
+        padding='SAME',
         strides=(strides, strides), name='{}_conv2d'.format(name))
     if not activation is None:
       x = activation(x)
@@ -75,6 +76,7 @@ class Model:
   def deconv2d(self, x, filters, size, strides, name, training,
       activation=tf.nn.relu, bn=True):
     x = tf.layers.conv2d_transpose(x, filters=filters, kernel_size=size,
+        padding='SAME',
         strides=(strides, strides), name='{}_deconv2d'.format(name))
     if not activation is None:
       x = activation(x)
