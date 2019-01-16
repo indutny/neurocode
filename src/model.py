@@ -8,9 +8,9 @@ class Model:
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[data]):
       x = data
 
-      x = self.deconv2d(x, 16, 3, 2, name='encode_1', training=training)
-      # x = self.deconv2d(x, 16, 3, 2, name='encode_2', training=training)
-      # x = self.deconv2d(x, 16, 3, 1, name='encode_3', training=training)
+      x = self.deconv2d(x, 32, 3, 1, name='encode_1', training=training)
+      x = self.deconv2d(x, 16, 3, 2, name='encode_2', training=training)
+      x = self.deconv2d(x, 8, 3, 1, name='encode_3', training=training)
       x = self.deconv2d(x, 1, 1, 1, name='encode_4', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
@@ -40,9 +40,9 @@ class Model:
       noise = tf.random.normal(tf.shape(x), stddev=0.2)
       x += noise * f_training
 
-      # x = self.conv2d(x, 16, 3, 1, name='decode_4', training=training)
-      # x = self.conv2d(x, 16, 3, 2, name='decode_3', training=training)
-      x = self.conv2d(x, 16, 3, 2, name='decode_2', training=training)
+      x = self.conv2d(x, 8, 3, 1, name='decode_4', training=training)
+      x = self.conv2d(x, 16, 3, 2, name='decode_3', training=training)
+      x = self.conv2d(x, 32, 3, 1, name='decode_2', training=training)
       x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
           activation=None, bn=False)
 
@@ -72,7 +72,6 @@ class Model:
   def conv2d(self, x, filters, size, strides, name, training,
              activation=tf.nn.relu, bn=True):
     x = tf.layers.conv2d(x, filters=filters, kernel_size=size,
-        padding='SAME',
         strides=(strides, strides), name='{}_conv2d'.format(name))
     if not activation is None:
       x = activation(x)
@@ -81,7 +80,6 @@ class Model:
   def deconv2d(self, x, filters, size, strides, name, training,
       activation=tf.nn.relu, bn=True):
     x = tf.layers.conv2d_transpose(x, filters=filters, kernel_size=size,
-        padding='SAME',
         strides=(strides, strides), name='{}_deconv2d'.format(name))
     if not activation is None:
       x = activation(x)
