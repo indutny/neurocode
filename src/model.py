@@ -22,7 +22,7 @@ class Model:
     angle = tf.math.atan2(sin, cos)
     hue = (angle / math.pi + 1.0) / 2.0
     pad = tf.ones_like(hue)
-    hsv = tf.concat([ hue, pad, pad ], axis=-1)
+    hsv = tf.concat([ hue, pad / 1.5, pad ], axis=-1)
     return tf.image.hsv_to_rgb(hsv)
 
   def decode(self, image, training):
@@ -30,20 +30,6 @@ class Model:
       x = image
 
       f_training = tf.cast(training, dtype=tf.float32)
-
-      # Non-normalizing dropout
-      if False:
-        mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
-        mask_noise = tf.random_uniform(tf.shape(x))
-        x = f_training * (mask * x  + (1.0 - mask) * mask_noise) + \
-            (1.0 - f_training) * x
-
-      # Contrast
-      contrast = tf.exp(tf.random.normal(tf.shape(x), \
-          mean=0.0, stddev=0.18232155))
-      x -= 0.5
-      x *= contrast * f_training + (1.0 - f_training)
-      x += 0.5
 
       # Noise
       noise = tf.random.normal(tf.shape(x), stddev=0.2)
