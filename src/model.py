@@ -9,8 +9,8 @@ class Model:
       x = data
 
       x = self.deconv2d(x, 16, 3, 2, name='encode_1', training=training)
-      x = self.deconv2d(x, 32, 3, 2, name='encode_2', training=training)
-      x = self.deconv2d(x, 64, 3, 1, name='encode_3', training=training)
+      # x = self.deconv2d(x, 16, 3, 2, name='encode_2', training=training)
+      # x = self.deconv2d(x, 16, 3, 1, name='encode_3', training=training)
       x = self.deconv2d(x, 1, 1, 1, name='encode_4', training=training,
           activation=tf.nn.sigmoid, bn=False)
 
@@ -23,24 +23,25 @@ class Model:
       f_training = tf.cast(training, dtype=tf.float32)
 
       # Non-normalizing dropout
-      mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
-      mask_noise = tf.random_uniform(tf.shape(x))
-      x = f_training * (mask * x  + (1.0 - mask) * mask_noise) + \
-          (1.0 - f_training) * x
+      if False:
+        mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
+        mask_noise = tf.random_uniform(tf.shape(x))
+        x = f_training * (mask * x  + (1.0 - mask) * mask_noise) + \
+            (1.0 - f_training) * x
 
       # Contrast
       contrast = tf.exp(tf.random.normal(tf.shape(x), \
-          mean=0.0, stddev=0.405465))
+          mean=0.0, stddev=0.18232155))
       x -= 0.5
       x *= contrast * f_training + (1.0 - f_training)
       x += 0.5
 
       # Noise
-      noise = tf.random.normal(tf.shape(x), stddev=0.3)
+      noise = tf.random.normal(tf.shape(x), stddev=0.2)
       x += noise * f_training
 
-      x = self.conv2d(x, 64, 3, 1, name='decode_4', training=training)
-      x = self.conv2d(x, 32, 3, 2, name='decode_3', training=training)
+      # x = self.conv2d(x, 16, 3, 1, name='decode_4', training=training)
+      # x = self.conv2d(x, 16, 3, 2, name='decode_3', training=training)
       x = self.conv2d(x, 16, 3, 2, name='decode_2', training=training)
       x = self.conv2d(x, 16, 1, 1, name='decode_1', training=training,
           activation=None, bn=False)
