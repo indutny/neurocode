@@ -23,7 +23,7 @@ class Model:
       f_training = tf.cast(training, dtype=tf.float32)
 
       # Non-normalizing dropout
-      mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.2, dtype=tf.float32)
+      mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
       mask_noise = tf.random_uniform(tf.shape(x))
       x = f_training * (mask * x  + (1.0 - mask) * mask_noise) + \
           (1.0 - f_training) * x
