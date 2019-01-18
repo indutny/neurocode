@@ -19,20 +19,19 @@ class Model:
     with tf.variable_scope('neurocode', reuse=tf.AUTO_REUSE, values=[image]):
       x = image
 
+      # Gray = 0.0
+      x -= 0.5
+
       f_training = tf.cast(training, dtype=tf.float32)
 
       # Non-normalizing dropout
       mask = tf.cast(tf.random_uniform(tf.shape(x)) > 0.5, dtype=tf.float32)
-      mask_noise = tf.random_uniform(tf.shape(x))
-      x = f_training * (mask * x  + (1.0 - mask) * mask_noise) + \
-          (1.0 - f_training) * x
+      x *= f_training * mask + (1.0 - f_training) * 1.0
 
       # Contrast
       contrast = tf.exp(tf.random.normal(tf.shape(x), \
           mean=0.0, stddev=0.18232155))
-      x -= 0.5
       x *= contrast * f_training + (1.0 - f_training)
-      x += 0.5
 
       # Noise
       noise = tf.random.normal(tf.shape(x), stddev=0.2)
