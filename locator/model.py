@@ -21,7 +21,7 @@ class Model:
       confidence, pos, size = tf.split(x, [ 2, 2, 1 ], axis=-1)
 
       pos = tf.tanh(pos, name='pos')
-      size = tf.nn.relu(size, name='size')
+      size = tf.exp(size, name='size')
 
       return tf.concat([ confidence, pos, size ], axis=-1)
 
@@ -37,7 +37,8 @@ class Model:
         logits=confidence)
 
     pos_loss = tf.reduce_mean(((pos - l_pos) ** 2) * l_present)
-    size_loss = tf.reduce_mean(((size - l_size) ** 2) * l_present)
+    size_loss = tf.reduce_mean(
+        ((tf.sqrt(size) - tf.sqrt(l_size)) ** 2) * l_present)
 
     loss = confidence_loss + 10.0 * (pos_loss + size_loss)
 
