@@ -14,7 +14,7 @@ print('config', CONFIG)
 LOG_DIR = os.path.join('.', 'logs', RUN_NAME)
 SAVE_DIR = os.path.join('.', 'saves', RUN_NAME)
 
-BATCH_SIZE = 1024
+BATCH_SIZE = 256
 SAVE_EVERY = 100
 VALIDATE_EVERY = 10
 
