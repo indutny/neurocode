@@ -61,6 +61,15 @@ with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
   sess.graph.finalize()
 
+  total_size = 0
+  for var in tf.trainable_variables():
+    size = 1
+    for layer_size in var.shape:
+      size *= layer_size
+    total_size += size
+    print('name: {} shape: {} size: {}'.format(var.name, var.shape, size))
+  print('total size: {}'.format(total_size))
+
   epoch_value = sess.run(epoch)
   while True:
     epoch_value = sess.run(epoch_inc)
