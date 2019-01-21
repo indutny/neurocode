@@ -20,7 +20,7 @@ class Model:
           activation=None, bn=False)
       confidence, pos, size = tf.split(x, [ 2, 2, 1 ], axis=-1)
 
-      pos = tf.sigmoid(pos, name='pos')
+      pos = tf.tanh(pos, name='pos')
       size = tf.exp(size, name='size')
 
       return tf.concat([ confidence, pos, size ], axis=-1)
