@@ -20,11 +20,13 @@ VALIDATE_EVERY = 10
 
 writer = tf.summary.FileWriter(LOG_DIR)
 
-def gen_data(markers, batch_size = BATCH_SIZE):
+def gen_data(marker, batch_size = BATCH_SIZE):
   height = tf.shape(marker)[0]
   width = tf.shape(marker)[1]
   f_height = tf.cast(height, dtype=tf.float32)
   f_width = tf.cast(width, dtype=tf.float32)
+
+  marker = tf.tile(tf.expand_dims(marker, axis=0), [ batch_size, 1, 1, 1 ])
 
   size = tf.random.uniform([ batch_size, 1 ], minval=0.25, maxval=1.0,
       name='l_size')
@@ -40,19 +42,6 @@ def gen_data(markers, batch_size = BATCH_SIZE):
   one = tf.ones_like(size)
   zero = tf.zeros_like(size)
 
-  # Rotate around center
-  pre_rotate_transform = tf.concat(
-      [ one, zero, one * f_width / 2.0,
-        zero, one, one * f_height / 2.0, zero, zero ], axis=-1)
-  rotate_transform = tf.concat(
-      [ tf.cos(angle), -tf.sin(angle), zero, tf.sin(angle), tf.cos(angle),
-        zero, zero, zero ], axis=-1)
-  post_rotate_transform = tf.concat(
-      [ one, zero, -one * f_width / 2.0,
-        zero, one, -one * f_height / 2.0, zero, zero ], axis=-1)
-  rotate_transform = tf.contrib.image.compose_transforms(
-      pre_rotate_transform, rotate_transform, post_rotate_transform)
-
   size_transform = tf.concat(
       [ 1.0 / size, zero, zero, zero, 1.0 / size, zero, zero, zero ], axis=-1)
 
@@ -64,15 +53,12 @@ def gen_data(markers, batch_size = BATCH_SIZE):
       axis=-1)
 
   transform = tf.contrib.image.compose_transforms(
-      rotate_transform, size_transform, pos_transform)
+      size_transform, pos_transform)
 
-  images = tf.tile(tf.expand_dims(marker, axis=0), [ batch_size, 1, 1, 1 ])
-  masks = tf.ones_like(images)
-
-  images = tf.contrib.image.transform(images, transform,
-      interpolation='BILINEAR')
-  masks = tf.contrib.image.transform(masks, transform,
-      interpolation='BILINEAR')
+  # Note: -1.0 pushes black to -1.0 and white to 0.0, making
+  # `tf.contrib.image.transform` pad with white
+  images = tf.contrib.image.transform(marker - 1.0, transform,
+      interpolation='BILINEAR') + 0.5
 
   # Add some contrast noise
   contrast = tf.exp(tf.random.normal(tf.shape(images), \
@@ -81,14 +67,12 @@ def gen_data(markers, batch_size = BATCH_SIZE):
 
   # Add some noise
   noise = tf.random_uniform(tf.shape(images), minval=-0.5, maxval=0.5)
-  images += masks * noise * 0.5
-
-  # Add some padding noise
-  images += (1.0 - masks) * noise
+  images += noise
 
   e_present = tf.expand_dims(present, axis=-1)
   e_present = tf.expand_dims(e_present, axis=-1)
-  images = e_present * images + (1.0 - e_present) * noise
+  images = e_present * images + \
+      (1.0 - e_present) * (noise + tf.random_uniform([ batch_size, 1, 1, 1 ]))
 
   images = tf.clip_by_value(images, -0.5, 0.5)
 
@@ -100,7 +84,6 @@ def gen_data(markers, batch_size = BATCH_SIZE):
 with tf.Session() as sess:
   marker = sess.run(tf.image.decode_image(tf.read_file(MARKER_FILE),
     channels=1)) / 255.0
-  marker -= 0.5
   marker = tf.constant(marker, dtype=tf.float32, name='marker')
 
   optimizer = tf.train.AdamOptimizer(CONFIG['lr'])
@@ -123,7 +106,8 @@ with tf.Session() as sess:
   train = optimizer.minimize(loss, global_step)
 
   # Sample image
-  image = tf.summary.image('input', data[:1] + 0.5)
+  image = tf.summary.image('input',
+      tf.cast((data[:1] + 0.5) * 255.0, dtype=tf.uint8))
   validation_metrics = tf.summary.merge([ image ])
 
   writer.add_graph(tf.get_default_graph())
