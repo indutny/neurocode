@@ -40,7 +40,7 @@ class Model:
     size_loss = tf.reduce_mean(
         ((tf.sqrt(size) - tf.sqrt(l_size)) ** 2) * l_present)
 
-    loss = confidence_loss + 10.0 * (pos_loss + size_loss)
+    loss = confidence_loss + 3.0 * (pos_loss + size_loss)
 
     metrics = [
       tf.summary.scalar('{}/loss'.format(tag), loss),
