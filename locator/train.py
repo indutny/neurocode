@@ -32,8 +32,6 @@ def gen_data(marker, batch_size = BATCH_SIZE):
       name='l_size')
   pos = tf.random.uniform([ batch_size, 2 ], name='l_pos') * \
       (1.0 - size)
-  angle = tf.random.uniform([ batch_size, 1 ], minval=0, maxval=math.pi / 2.0,
-      name='l_angle')
   present = tf.cast(
       tf.random.uniform([ batch_size, 1 ], name='l_pos') > 0.5,
       dtype=tf.float32)
