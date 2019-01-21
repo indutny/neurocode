@@ -28,7 +28,7 @@ def gen_data(marker, batch_size = BATCH_SIZE):
 
   marker = tf.tile(tf.expand_dims(marker, axis=0), [ batch_size, 1, 1, 1 ])
 
-  size = tf.random.uniform([ batch_size, 1 ], minval=0.25, maxval=1.0,
+  size = tf.random.uniform([ batch_size, 1 ], minval=0.1, maxval=1.0,
       name='l_size')
   pos = tf.random.uniform([ batch_size, 2 ], name='l_pos') * \
       (1.0 - size)
