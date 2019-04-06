@@ -14,7 +14,7 @@ print('config', CONFIG)
 LOG_DIR = os.path.join('.', 'logs', RUN_NAME)
 SAVE_DIR = os.path.join('.', 'saves', RUN_NAME)
 
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 SAVE_EVERY = 100
 VALIDATE_EVERY = 10
 
@@ -27,13 +27,14 @@ def gen_data(marker, batch_size = BATCH_SIZE):
   f_width = tf.cast(width, dtype=tf.float32)
 
   marker = tf.tile(tf.expand_dims(marker, axis=0), [ batch_size, 1, 1, 1 ])
+  marker = tf.zeros_like(marker)
 
-  size = tf.random.uniform([ batch_size, 1 ], minval=0.25, maxval=1.0,
+  size = tf.random.uniform([ batch_size, 1 ], minval=0.25, maxval=0.25,
       name='l_size')
   pos = tf.random.uniform([ batch_size, 2 ], name='l_pos') * \
       (1.0 - size)
   present = tf.cast(
-      tf.random.uniform([ batch_size, 1 ], name='l_pos') > 0.5,
+      tf.random.uniform([ batch_size, 1 ], name='l_pos') > 0.0,
       dtype=tf.float32)
 
   # Helpers
@@ -61,11 +62,11 @@ def gen_data(marker, batch_size = BATCH_SIZE):
   # Add some contrast noise
   contrast = tf.exp(tf.random.normal(tf.shape(images), \
       mean=0.0, stddev=0.18232155))
-  images *= contrast
+  # images *= contrast
 
   # Add some noise
   noise = tf.random_uniform(tf.shape(images), minval=-0.5, maxval=0.5)
-  images += noise
+  # images += noise
 
   e_present = tf.expand_dims(present, axis=-1)
   e_present = tf.expand_dims(e_present, axis=-1)
@@ -97,16 +98,40 @@ with tf.Session() as sess:
 
   data, labels = gen_data(marker)
 
-  prediction = model.forward(data, training=True)
+  prediction, fwd_metrics = model.forward(data, training=True)
 
   loss, metrics = \
       model.loss_and_metrics(predictions=prediction, labels=labels)
   train = optimizer.minimize(loss, global_step)
 
   # Sample image
+  present, l_pos_x, l_pos_y, l_size = tf.split(labels, [ 1, 1, 1, 1 ], axis=-1)
+  l_pos_x += 0.5
+  l_pos_y += 0.5
+
+  _, pos_x, pos_y, size = tf.split(prediction, [ 2, 1, 1, 1 ], axis=-1)
+  pos_x += 0.5
+  pos_y += 0.5
+
+  bbox_1 = tf.concat([ pos_y - size / 2.0, pos_x - size / 2.0,
+                       pos_y + size / 2.0, pos_x + size / 2.0 ], axis=-1)
+  bbox_1 = tf.squeeze(bbox_1, axis=1)
+
+  bbox_2 = tf.concat([ l_pos_y - l_size / 2.0, l_pos_x - l_size / 2.0,
+                       l_pos_y + l_size / 2.0, l_pos_x + l_size / 2.0 ],
+                     axis=-1)
+  bbox_2 = tf.expand_dims(bbox_2, axis=1)
+
+  bbox = tf.concat([ bbox_1, bbox_2 ], axis=1)
+
+  bbox *= tf.expand_dims(present, axis=-1)
+  sample = data + 0.5
+  sample = tf.tile(sample, [ 1, 1, 1, 3 ])
+
+  sample = tf.image.draw_bounding_boxes(sample, bbox)
   image = tf.summary.image('input',
-      tf.cast((data[:1] + 0.5) * 255.0, dtype=tf.uint8))
-  validation_metrics = tf.summary.merge([ image ])
+      tf.cast(sample * 255.0, dtype=tf.uint8))
+  validation_metrics = tf.summary.merge([ image, fwd_metrics ])
 
   writer.add_graph(tf.get_default_graph())
   saver = tf.train.Saver(max_to_keep=100, name=RUN_NAME)
